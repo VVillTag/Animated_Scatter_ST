@@ -28,12 +28,43 @@ data = pd.DataFrame({
     'Margin(%)': np.random.uniform(5, 25, len(departments) * len(months)),  # Margin in percentages
     'Headcount': np.random.randint(50, 500, len(departments) * len(months))  # Headcount as size
 })
-st.dataframe(data, hide_index=True, use_container_width= True)
+
 
 data['Month_Year'] = pd.to_datetime(data['Month_Year'])
 
+min_value = data['Month_Year'].min()
+max_value = data['Month_Year'].max()
+
+
+from_year, to_year = st.date_input(
+    'Which month-years are you interested in?',
+    min_value=min_value,
+    max_value=max_value,
+    value=[min_value, max_value])
+
+departmentss = data['Department'].unique()
+
+if not len(departmentss):
+    st.warning("Select at least one department")
+
+selected_departmentss = st.multiselect(
+    'Which departments would you like to view?',
+    departmentss,
+    ['HR', 'BU2', 'BU3', 'Finance', 'IT', 'Sales']
+    )
+
+# Filter the data
+filtered_data = data[
+    (data['Department'].isin(selected_departmentss))
+    & (data['Month_Year'].dt.date <= to_year)
+    & (from_year <= data['Month_Year'].dt.date)
+]
+
+
+
+
 # Create animated scatter plot using Plotly Express
-fig = px.scatter(data, y='Revenue', x='Margin(%)', animation_frame='Month_Year',
+fig = px.scatter(filtered_data, y='Revenue', x='Margin(%)', animation_frame='Month_Year',
                  animation_group='Department', size='Headcount', color='Department', 
                  text='Department', range_x=[0, 30], range_y=[0, 1500],
                  labels={'Revenue': 'Revenue', 'Margin(%)': 'Margin %'})
@@ -71,3 +102,6 @@ fig.update_layout(
 st.header('Animated Scatter Plot: Revenue vs Margin by Department', divider="rainbow")
 # Show plot in Streamlit
 st.plotly_chart(fig)
+
+st.header('Random Data Generated', divider="grey")
+st.dataframe(data, hide_index=True, use_container_width= True)
