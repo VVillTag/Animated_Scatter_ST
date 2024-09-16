@@ -1,4 +1,4 @@
-# :earth: Animated Scatter Plot PoC
+# :earth_europe: Animated Scatter Plot PoC
 
 A simple Streamlit app showing the animated scatter plot.
 
